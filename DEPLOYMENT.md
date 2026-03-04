@@ -44,3 +44,23 @@ python3 crawler.py --start 1 --end 100
 ```bash
 python3 crawler.py --start 1 --end 100
 ```
+
+## Токенизация и лемматизация
+
+После скачивания страниц можно выполнить обработку текста.
+
+```bash
+python3 tokenize_lemmatize.py --dump dump --out-dir out
+
+Будут созданы файлы:
+
+out/
+  tokens/
+    *.txt
+  lemmas/
+    *.txt
+
+Для каждой страницы:
+
+файл со списком токенов
+файл с леммами и соответствующими токенами
