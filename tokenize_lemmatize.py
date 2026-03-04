@@ -33,7 +33,7 @@ EN_STOPWORDS: Set[str] = {
 BAD_POS: Set[str] = {"PREP", "CONJ", "PRCL", "INTJ", "NUMR"}
 
 # Ищем "похожие на слова" последовательности (только кириллица, допускаем дефис/апостроф)
-TOKEN_RE = re.compile(r"[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё\-']+")
+TOKEN_RE = re.compile(r"[А-Яа-яЁё][А-Яа-яЁё\-']+")
 
 
 def html_to_text(html: str) -> str:
