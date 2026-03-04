@@ -177,10 +177,10 @@ def crawl(config: CrawlerConfig) -> None:
             continue
 
         # Сохраняем HTML как есть (без очистки)
-        html_text = resp.text
+       
 
-        with open(out_path, "w", encoding="utf-8", errors="replace") as f:
-            f.write(html_text)
+        with open(out_path, "wb") as f:
+            f.write(resp.content)
 
         index_lines.append(f"{fname}\t{url}")
         downloaded += 1
