@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import time
+import re
 from dataclasses import dataclass
 from typing import List, Tuple
 
@@ -120,6 +121,47 @@ def file_name_for_index(i: int, total_digits: int = 4) -> str:
     return f"{i:0{total_digits}d}.html"
 
 
+def _detect_charset(resp: requests.Response, raw: bytes) -> str:
+    """
+    Определяем кодировку HTML:
+    1) из HTTP Content-Type
+    2) из meta charset в первых байтах HTML
+    3) fallback: windows-1251 (для ilibrary)
+    """
+    ctype = resp.headers.get("Content-Type", "")
+    m = re.search(r"charset=([^\s;]+)", ctype, flags=re.I)
+    if m:
+        return m.group(1).strip().strip('"').strip("'").lower()
+
+    head = raw[:8192].decode("ascii", errors="ignore")
+    m2 = re.search(r"charset\s*=\s*([^\s\"'>/]+)", head, flags=re.I)
+    if m2:
+        return m2.group(1).strip().lower()
+
+    return "windows-1251"
+
+
+def html_to_utf8_text(resp: requests.Response) -> str:
+    """
+    Превращаем страницу в UTF-8 строку:
+    - декодируем байты с правильной кодировкой (обычно windows-1251)
+    - заменяем meta charset на utf-8
+    """
+    raw = resp.content
+    enc = _detect_charset(resp, raw)
+
+    try:
+        html = raw.decode(enc, errors="replace")
+    except LookupError:
+        html = raw.decode("windows-1251", errors="replace")
+
+    # Исправляем meta charset, чтобы браузер/VS Code читали одинаково
+    html = re.sub(r'(<meta[^>]*charset=)[^"\'>\s]+', r'\1utf-8', html, flags=re.I)
+    html = re.sub(r'(<meta[^>]*content=["\'][^"\']*charset=)[^"\']+', r'\1utf-8', html, flags=re.I)
+
+    return html
+
+
 
 # Основная логика краулера
 
@@ -176,11 +218,10 @@ def crawl(config: CrawlerConfig) -> None:
             print(f"[{idx}/{total}] Не текстовая страница: {url}")
             continue
 
-        # Сохраняем HTML как есть (без очистки)
-       
-
-        with open(out_path, "wb") as f:
-            f.write(resp.content)
+        # Сохраняем HTML в UTF-8, чтобы и браузер, и VS Code отображали нормально
+        html_utf8 = html_to_utf8_text(resp)
+        with open(out_path, "w", encoding="utf-8", errors="replace") as f:
+            f.write(html_utf8)
 
         index_lines.append(f"{fname}\t{url}")
         downloaded += 1
@@ -190,7 +231,7 @@ def crawl(config: CrawlerConfig) -> None:
         # Пауза, чтобы не перегружать сервер
         time.sleep(config.delay_sec)
 
-    # Записываем index.txt
+    # Записываем index.txt (UTF-8)
     with open(config.index_path, "w", encoding="utf-8") as f:
         f.write("\n".join(index_lines) + "\n")
 
