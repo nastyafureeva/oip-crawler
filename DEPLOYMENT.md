@@ -51,7 +51,7 @@ python3 crawler.py --start 1 --end 100
 
 ```bash
 python3 tokenize_lemmatize.py --dump dump --out-dir out
-
+```
 Будут созданы файлы:
 
 out/
@@ -64,3 +64,27 @@ out/
 
 файл со списком токенов
 файл с леммами и соответствующими токенами
+
+
+
+## Построение инвертированного индекса
+
+После лемматизации можно построить инвертированный индекс:
+
+```bash
+python3 build_index_from_lemmas.py --lemmas out/lemmas --out inverted_index.json
+```
+Будет создан файл:
+
+inverted_index.json
+
+## Булев поиск
+
+Поиск выполняется по построенному индексу.
+
+Пример:
+
+```bash
+python3 boolean_search.py -q "(клеопатра AND цезарь) OR помпей"
+```
+На экран выводится список документов, удовлетворяющих запросу.
