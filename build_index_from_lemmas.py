@@ -29,7 +29,7 @@ def read_doc_lemmas(path: str) -> Set[str]:
 
             # первая колонка — лемма
             lemmas.add(parts[0].lower())
-        print("DEBUG sample:", list(lemmas)[:20])
+            
 
     return lemmas
 

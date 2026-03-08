@@ -1,8 +1,7 @@
 requests==2.32.3
 urllib3==2.2.2
 
-setuptools
 beautifulsoup4
 lxml
-pymorphy2
-pymorphy2-dicts-ru
+pymorphy3
+pymorphy3-dicts-ru
