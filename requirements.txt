@@ -5,3 +5,4 @@ beautifulsoup4
 lxml
 pymorphy3
 pymorphy3-dicts-ru
+Flask
